@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
+    <title>Crypto</title>
+    <style>
+        .container { width: 90%; margin: 20px; text-align: center; }
+        .container h1 { margin-bottom: 50px; font-size:1.2rem;}
+        .container .inputBox { min-width: 300px; display: flex; justify-content: center; margin-bottom: 30px; }
+        .container .key { height: 30px; margin-bottom: 50px; }
+        .container .key p { line-height: 0px; height: 30px; min-width: 100px; }
+        .container .key input { height: 30px; width: 300px; border:1px solid grey; }
+        .container .message textarea { width: 300px; height: 100px; border: 1px solid grey;}
+        .container .message p { min-width: 100px; }
+        .container .button { padding: 5px 10px; font-size: 16px; width: 100px; margin: 5px 5px; }
+        .container .result { width: 90%; padding:5px; min-height:100px; border: 1px solid black; margin: auto; margin-top: 30px; overflow-y: scroll; }
+        .container .message .browse { position:absolute; margin-left: 150px; margin-top:-20px;max-width: 200px;}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Encrypt-Decrypt tool</h1>
+
+        <div class="inputBox key">
+            <p>Key</p>
+            <input type="text" id="key" value="">
+        </div>
+
+        <div class="inputBox message">
+            <p>Message</p>
+            <textarea name="" id="message" cols="30" rows="10" value=""></textarea>
+            <input class="browse" type="file" id="file-selector">
+        </div>
+
+        <button class="button" onclick="EncryptDecrypt('enc')">Encrypt</button>
+        <button class="button" onclick="EncryptDecrypt('dec')">Decrypt</button>
+        <button class="button" onclick="clearInputs()">Clear</button>
+        <button class="button" onclick="copyOutput()">Copy</button>
+        <button class="button" onclick="downloadFile()">Download</button>
+
+
+        <div class="result" id="result"></div>
+    </div>
+    
+    <script type="text/javascript">
+        
+        const keyInput = document.getElementById("key");
+        const messageInput = document.getElementById("message");
+        const result = document.getElementById("result");
+        const fileSelector = document.getElementById("file-selector");
+
+        fileSelector.addEventListener("change", (event) => {
+            const file = event.target.files[0];
+            console.log(file);
+            const reader = new FileReader();
+            reader.addEventListener("load", (event)=>{
+                const result = event.target.result;
+                messageInput.value = result;
+            })
+            reader.readAsText(file);
+        })
+
+        function copyOutput() {
+            let copyData = result.innerText;
+            if(copyData)
+                navigator.clipboard.writeText(copyData);
+        }
+
+        function EncryptDecrypt(type) {
+            let key = keyInput.value;
+            let message = messageInput.value;
+            let encryptedMessage = "";
+
+            if (key == "" || message == "") return false;
+
+            for (let i = 0; i < message.length;) {
+                for (let j = 0; j < key.length && message[i]; j++) {
+                    let asciiCode;
+                    if (type == "enc")
+                        asciiCode = message.charCodeAt(i) + key.charCodeAt(j);
+                    else
+                        asciiCode = message.charCodeAt(i) - key.charCodeAt(j);
+
+                    encryptedMessage += String.fromCharCode(asciiCode)
+                    i++;
+                }
+            }
+
+            showMessage(encryptedMessage);
+        }
+        function showMessage(message) {
+            result.innerText = message;
+        }
+
+        function clearInputs() {
+            keyInput.value = "";
+            messageInput.value = "";
+            result.innerHTML = "";
+            fileSelector.value = ""
+        }
+
+        function uploadFile() {
+
+        }
+
+        function downloadFile() {
+            let data = result.innerText;
+            if(data == "") return false;
+
+            let now = new Date();
+            let filename = "data_" + now.getDate() + "/" + (now.getMonth() + 1) + "/" + now.getFullYear() + "_" + now.getHours() + "_" + now.getMinutes() + "_" + now.getSeconds() + ".txt";
+
+            console.log(filename);
+            let blob = new Blob([data], { type: "text/plain;charset=utf-8" })
+            saveAs(blob, filename);
+        }
+
+    </script>
+</body>
+
+
+
+</html>
